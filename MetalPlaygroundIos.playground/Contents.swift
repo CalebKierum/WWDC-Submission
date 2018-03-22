@@ -1,7 +1,8 @@
 //: Playground - noun: a place where people can play
 
 import PlaygroundSupport
-import Cocoa
+//import Cocoa
+import UIKit
 import Foundation
 import CoreGraphics
 import MetalKit
@@ -51,7 +52,8 @@ extension MTLTexture {
         }
         return false
     }
-    func toImage() -> NSImage? {
+   // func toImage() -> NSImage? {
+    func toImage() -> UIImage? {
         let texture = self
         let width = texture.width
         let height = texture.height
@@ -75,8 +77,17 @@ extension MTLTexture {
         guard let cgImage = context.makeImage() else { return nil }
         
         
-        return NSImage(cgImage: cgImage, size: NSSize(width: width, height: height))
+        //return NSImage(cgImage: cgImage, size: NSSize(width: width, height: height))
+        return UIImage(cgImage: cgImage)
     }
+    
+    
+}
+func viewImage(_ img: UIImage, _ view: UIView) {
+    let imageView = UIImageView(image: img)
+    imageView.translatesAutoresizingMaskIntoConstraints = false
+    imageView.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
+    view.addSubview(imageView)
 }
 
 public func ensure<T>(_ expr: @autoclosure () throws -> T?, orError message: @autoclosure () -> String = "Error") -> T
@@ -104,8 +115,14 @@ public struct ThreadgroupSizes
 }
 
 //Setup the view
-var view = NSView(frame: NSRect(x: 0, y: 0, width: 100, height: 100))
+//var view = NSView(frame: NSRect(x: 0, y: 0, width: 100, height: 100))
+var view = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+let img = UIImage(named: "gradient.png")!
+viewImage(img, view)
+//viewImage(img, view)
 PlaygroundPage.current.liveView = view
+
+
 //PlaygroundPage.current.needsIndefiniteExecution = true
 
 //Prepare the levels of encoding
@@ -142,7 +159,7 @@ encoder.dispatchThreadgroups(threadgroupsPerGrid, threadsPerThreadgroup: threads
 encoder.endEncoding()
 
 let syncEncoder = buffer.makeBlitCommandEncoder()!
-syncEncoder.synchronize(resource: texture)
+//syncEncoder.synchronize(resource: texture)
 syncEncoder.endEncoding()
 
 buffer.commit()
@@ -150,6 +167,7 @@ buffer.waitUntilCompleted()
 
 
 let tex2 = texture.toImage()!
+viewImage(tex2, view)
 print(texture.anythingHere())
 
 //Debug pixel
@@ -169,3 +187,4 @@ let library = ensure(try device.makeLibrary(source: shaderSource, options: nil),
 
 
 */
+

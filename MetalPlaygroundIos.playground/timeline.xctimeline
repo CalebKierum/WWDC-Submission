@@ -3,42 +3,42 @@
    version = "3.0">
    <TimelineItems>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/MetalPlaygroundIos.playground#CharacterRangeLen=16&amp;CharacterRangeLoc=5610&amp;EndingColumnNumber=12&amp;EndingLineNumber=157&amp;StartingColumnNumber=12&amp;StartingLineNumber=154&amp;Timestamp=543374542.994972"
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/MetalPlaygroundIos.playground#CharacterRangeLen=16&amp;CharacterRangeLoc=6149&amp;EndingColumnNumber=8&amp;EndingLineNumber=175&amp;StartingColumnNumber=8&amp;StartingLineNumber=172&amp;Timestamp=543397144.344834"
          selectedRepresentationIndex = "0"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/MetalPlaygroundIos.playground#CharacterRangeLen=0&amp;CharacterRangeLoc=5610&amp;EndingColumnNumber=12&amp;EndingLineNumber=154&amp;StartingColumnNumber=12&amp;StartingLineNumber=154&amp;Timestamp=543374542.995199"
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/MetalPlaygroundIos.playground#CharacterRangeLen=0&amp;CharacterRangeLoc=6149&amp;EndingColumnNumber=8&amp;EndingLineNumber=172&amp;StartingColumnNumber=8&amp;StartingLineNumber=172&amp;Timestamp=543397144.345059"
          selectedRepresentationIndex = "0"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/MetalPlaygroundIos.playground#CharacterRangeLen=11&amp;CharacterRangeLoc=4751&amp;EndingColumnNumber=8&amp;EndingLineNumber=127&amp;StartingColumnNumber=62&amp;StartingLineNumber=126&amp;Timestamp=543374542.995331"
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/MetalPlaygroundIos.playground#CharacterRangeLen=11&amp;CharacterRangeLoc=5266&amp;EndingColumnNumber=4&amp;EndingLineNumber=144&amp;StartingColumnNumber=58&amp;StartingLineNumber=143&amp;Timestamp=543397144.3452131"
          selectedRepresentationIndex = "0"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/MetalPlaygroundIos.playground#CharacterRangeLen=4&amp;CharacterRangeLoc=5501&amp;EndingColumnNumber=14&amp;EndingLineNumber=147&amp;StartingColumnNumber=10&amp;StartingLineNumber=147&amp;Timestamp=543374542.9954211"
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/MetalPlaygroundIos.playground#CharacterRangeLen=4&amp;CharacterRangeLoc=6018&amp;EndingColumnNumber=10&amp;EndingLineNumber=164&amp;StartingColumnNumber=6&amp;StartingLineNumber=164&amp;Timestamp=543397144.34536"
          selectedRepresentationIndex = "0"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/MetalPlaygroundIos.playground#CharacterRangeLen=4&amp;CharacterRangeLoc=5499&amp;EndingColumnNumber=12&amp;EndingLineNumber=147&amp;StartingColumnNumber=8&amp;StartingLineNumber=147&amp;Timestamp=543374542.995507"
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/MetalPlaygroundIos.playground#CharacterRangeLen=4&amp;CharacterRangeLoc=6016&amp;EndingColumnNumber=8&amp;EndingLineNumber=164&amp;StartingColumnNumber=4&amp;StartingLineNumber=164&amp;Timestamp=543397144.345507"
          selectedRepresentationIndex = "0"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/MetalPlaygroundIos.playground#CharacterRangeLen=3&amp;CharacterRangeLoc=4758&amp;EndingColumnNumber=7&amp;EndingLineNumber=127&amp;StartingColumnNumber=4&amp;StartingLineNumber=127&amp;Timestamp=543374542.995591"
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/MetalPlaygroundIos.playground#CharacterRangeLen=3&amp;CharacterRangeLoc=5273&amp;EndingColumnNumber=3&amp;EndingLineNumber=144&amp;StartingColumnNumber=0&amp;StartingLineNumber=144&amp;Timestamp=543397144.34565"
          selectedRepresentationIndex = "0"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/MetalPlaygroundIos.playground#CharacterRangeLen=4&amp;CharacterRangeLoc=5541&amp;EndingColumnNumber=8&amp;EndingLineNumber=151&amp;StartingColumnNumber=4&amp;StartingLineNumber=151&amp;Timestamp=543374542.995674"
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/MetalPlaygroundIos.playground#CharacterRangeLen=4&amp;CharacterRangeLoc=6058&amp;EndingColumnNumber=4&amp;EndingLineNumber=168&amp;StartingColumnNumber=0&amp;StartingLineNumber=168&amp;Timestamp=543397144.345794"
          selectedRepresentationIndex = "0"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/MetalPlaygroundIos.playground#CharacterRangeLen=4&amp;CharacterRangeLoc=5542&amp;EndingColumnNumber=9&amp;EndingLineNumber=151&amp;StartingColumnNumber=5&amp;StartingLineNumber=151&amp;Timestamp=543374542.995756"
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/MetalPlaygroundIos.playground#CharacterRangeLen=4&amp;CharacterRangeLoc=6059&amp;EndingColumnNumber=5&amp;EndingLineNumber=168&amp;StartingColumnNumber=1&amp;StartingLineNumber=168&amp;Timestamp=543397144.345935"
          selectedRepresentationIndex = "0"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
