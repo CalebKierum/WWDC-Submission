@@ -1,11 +1,9 @@
 //: Playground - noun: a place where people can play
 
-import UIKit
-//import Cocoa
 import PlaygroundSupport
 
 
-let view = playgroundMetal(frame: Rect(x: 0, y: 0, width: 100, height: 100))
+let view = playgroundMetal(frame: Rect(x: 0, y: 0, width: 400, height: 400))
 let buffer = VertexBufferCreator()
 buffer.addVertex(x: -1, y: -1, color: Color.red)
 buffer.addVertex(x: 0, y: 1, color: Color.green)
@@ -21,11 +19,11 @@ let render =  view.getRenderEncoder()
 
 render.setRenderPipelineState(pipeline)
 render.setVertexBuffer(object, offset: 0, index: 0)
-render.drawPrimitives(type: MTLPrimitiveType.triangle, vertexStart: 0, vertexCount: 3)
+render.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
 
 view.finishEncoding(encoder: render)
 view.finishFrame()
 
 PlaygroundPage.current.liveView = view
-PlaygroundPage.current.needsIndefiniteExecution = true
+//PlaygroundPage.current.needsIndefiniteExecution = true
 

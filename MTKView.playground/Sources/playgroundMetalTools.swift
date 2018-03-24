@@ -16,42 +16,42 @@ import Accelerate
 
 //TO SWITCH! Switch typedefs uncomment line in display in playground and sync texture
 
-public typealias Color = UIColor //NSColor
-public typealias Image = UIImage //NSImage
-public typealias Rect = CGRect //NSRect
-public typealias View = UIView //NSView
-public typealias ImageView = UIImageView //NSImageView
-public typealias Size = CGSize
-extension CIColor {
-    static func convert(color: UIColor) -> CIColor {
-        return CIColor(color: color)
-    }
-}
-extension UIImage {
-    convenience init(cgImage: CGImage, size: Size) {
-        self.init(cgImage: cgImage)
-    }
-}
-
-
-//public typealias Color = NSColor
-//public typealias Image = NSImage
-//public typealias Rect = NSRect
-//public typealias View = NSView
-//public typealias ImageView = NSImageView
-//public typealias Size = NSSize
+//public typealias Color = UIColor //NSColor
+//public typealias Image = UIImage //NSImage
+//public typealias Rect = CGRect //NSRect
+//public typealias View = UIView //NSView
+//public typealias ImageView = UIImageView //NSImageView
+//public typealias Size = CGSize
 //extension CIColor {
-//    static func convert(color: NSColor) -> CIColor {
-//        return CIColor(color: color)!
+//    static func convert(color: UIColor) -> CIColor {
+//        return CIColor(color: color)
 //    }
-// }
+//}
+//extension UIImage {
+//    convenience init(cgImage: CGImage, size: Size) {
+//        self.init(cgImage: cgImage)
+//    }
+//}
+
+
+public typealias Color = NSColor
+public typealias Image = NSImage
+public typealias Rect = NSRect
+public typealias View = NSView
+public typealias ImageView = NSImageView
+public typealias Size = NSSize
+extension CIColor {
+    static func convert(color: NSColor) -> CIColor {
+        return CIColor(color: color)!
+    }
+ }
 
 
 
 
 
 public class Settings {
-    public static var sampleCount:Int = 1
+    public static var sampleCount:Int = 2
     public static var colorFormat:MTLPixelFormat = .rgba8Unorm
 }
 public func ensure<T>(_ expr: @autoclosure () throws -> T?, orError message: @autoclosure () -> String = "Error") -> T
@@ -255,9 +255,9 @@ public class playgroundMetal:View {
         if (shouldDrawBlank) {
             finishEncoding(encoder: getRenderEncoder())
         }
-        /*let syncEncoder = buffer?.makeBlitCommandEncoder()!
+        let syncEncoder = buffer?.makeBlitCommandEncoder()!
         syncEncoder?.synchronize(resource: drawable!)
-        syncEncoder?.endEncoding()*/
+        syncEncoder?.endEncoding()
         buffer?.commit()
         buffer?.waitUntilCompleted()
         state = .Idle
@@ -270,4 +270,8 @@ public class playgroundMetal:View {
     func debug() -> MTLTexture {
         return ensure(drawable)
     }
+}
+
+func createGrid() -> View? {
+    return nil
 }
