@@ -27,7 +27,8 @@ public class playgroundMetalView:View {
     private var shouldDrawBlank:Bool = true
     
     
-    public override init (frame: Rect) {
+    public init (size: CGFloat) {
+        let frame = Rect(x: 0, y: 0, width: size, height: size)
         dimensions = frame
         super.init(frame: frame)
         device = ensure(MTLCreateSystemDefaultDevice())
@@ -73,7 +74,6 @@ public class playgroundMetalView:View {
         
         return ensure(try device?.makeRenderPipelineState(descriptor: pipelineDescriptor))
     }
-    
     public func prepareFrame() {
         if (state != .Idle) {
             playgroundError(message: "Invalid Command! Must be idle current state is \(state)")
