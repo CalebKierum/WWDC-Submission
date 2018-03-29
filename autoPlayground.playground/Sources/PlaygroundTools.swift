@@ -5,6 +5,7 @@
 //
 
 import Metal
+import MetalKit
 import Foundation
 import SpriteKit
 

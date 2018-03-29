@@ -14,6 +14,7 @@
 
 
 import Metal
+import MetalKit
 
 //import UIKit
 //public typealias Color = UIColor
@@ -128,6 +129,18 @@ import Metal
 //        grid.gridOn()
 //    }
 //}
+//extension TextureTools {
+//    public static func loadTexture(image: UIImage) -> MTLTexture {
+//        let textureLoader = MTKTextureLoader(device: metalState.sharedDevice!)
+//
+//        let options = [
+//            MTKTextureLoader.Option.textureUsage: NSNumber(value: MTLTextureUsage.shaderRead.rawValue | MTLTextureUsage.shaderWrite.rawValue | MTLTextureUsage.renderTarget.rawValue),
+//            MTKTextureLoader.Option.SRGB: false
+//        ]
+//
+//        return ensure(try textureLoader.newTexture(cgImage: image.cgImage!, options: options))
+//    }
+//}
 
 //==--==--==--==--==--==--==--==--==--===--==--==--==--==--==--==--==--==--==--==--==--==--==
 //--==--==--==--==--==--==--==--==--===--==--==--==--==--==--==--==--==--==--==--==--==--==--
@@ -223,6 +236,32 @@ extension GridView {
         imageView!.layer!.contentsGravity = kCAGravityResizeAspectFill
         imageView!.layer!.contents = img
         imageView!.wantsLayer = true
+    }
+}
+extension NSImage {
+    public var CGImage: CGImage {
+        get {
+            var imageRect:CGRect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+            //gImage(forProposedRect:context:hints:)
+            return cgImage(forProposedRect: &imageRect, context: nil, hints: nil)!
+        }
+    }
+}
+extension TextureTools {
+    public static func loadTexture(image: NSImage) -> MTLTexture {
+        let textureLoader = MTKTextureLoader(device: metalState.sharedDevice!)
+
+        let options = [
+            MTKTextureLoader.Option.textureUsage: NSNumber(value: MTLTextureUsage.shaderRead.rawValue | MTLTextureUsage.shaderWrite.rawValue | MTLTextureUsage.renderTarget.rawValue),
+            MTKTextureLoader.Option.SRGB: false
+        ]
+
+        return ensure(try textureLoader.newTexture(cgImage: image.CGImage, options: options))
+    }
+}
+extension Image {
+    public convenience init?(named: String) {
+       self.init(named: NSImage.Name(named))
     }
 }
 

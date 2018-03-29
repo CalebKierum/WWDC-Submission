@@ -16,7 +16,7 @@ enum States {
 }
 
 public class metalState {
-    private var device:MTLDevice? = nil
+    public var device:MTLDevice? = nil
     private var queue:MTLCommandQueue? = nil
     private var state:States = .Idle
     private var buffer:MTLCommandBuffer? = nil

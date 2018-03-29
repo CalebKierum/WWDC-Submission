@@ -2,5 +2,10 @@
 <Timeline
    version = "3.0">
    <TimelineItems>
+      <LoggerValueHistoryTimelineItem
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/autoPlayground.playground#CharacterRangeLen=0&amp;CharacterRangeLoc=1028&amp;EndingColumnNumber=0&amp;EndingLineNumber=37&amp;StartingColumnNumber=0&amp;StartingLineNumber=37&amp;Timestamp=544046158.64048"
+         selectedRepresentationIndex = "0"
+         shouldTrackSuperviewWidth = "NO">
+      </LoggerValueHistoryTimelineItem>
    </TimelineItems>
 </Timeline>

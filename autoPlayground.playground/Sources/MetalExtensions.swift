@@ -28,7 +28,10 @@ public extension MTLTexture {
         texture.getBytes(data, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
         var buffer = vImage_Buffer(data: data, height: UInt(height), width: UInt(width), rowBytes: bytesPerRow)
         
-        let map: [UInt8] = [0, 1, 2, 3]
+        var map: [UInt8] = [0, 1, 2, 3]
+        if (pixelFormat == .bgra8Unorm) {
+            map = [2, 1, 0, 3]
+        }
         vImagePermuteChannels_ARGB8888(&buffer, &buffer, map, 0)
         
         guard let colorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear) else { return nil }
