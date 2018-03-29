@@ -6,6 +6,7 @@
 
 import Foundation
 import CoreGraphics
+import MetalKit
 
 struct Line {
     var start:Point
@@ -17,13 +18,31 @@ public class GridView:View {
     
     private var lines:[Line] = []
     private var fields:[Text] = []
-    public var RenderViewReference:View?
     private var contentColor:Color = Color.white
+    public var imageView:View? = nil
+    private var imageS:Image? = nil
     
-    public init(size: CGFloat) {
+    public init(size: CGFloat = 300.0) {
         super.init(frame: Rect(x: 0, y: 0, width: size, height: size))
         calculateGeometry(size: Size(width: size, height: size))
+        imageView = View()
+        addSubview(imageView!)
+        
     }
+    public init(old: GridView, size: CGFloat) {
+        old.imageView!.removeFromSuperview()
+        imageS = old.imageS
+        super.init(frame: Rect(x: 0, y: 0, width: size, height: size))
+        calculateGeometry(size: Size(width: size, height: size))
+        imageView = View()
+        addSubview(imageView!)
+    }
+    
+    public func view(image: Image) {
+        self.imageS = image
+        refresh()
+    }
+    
     func clearAllChildren() {
         lines.removeAll()
         for field in fields {
@@ -39,7 +58,6 @@ public class GridView:View {
     }
     func calculateGeometry(size: Size) {
         clearAllChildren()
-        
         //debugView(size: size)
         
         //Fills full range of thing
@@ -57,24 +75,13 @@ public class GridView:View {
         let origin = Point(x: 2 * padding + tickSize + twidth, y: 2 * padding + tickSize + theight)
         let length = min(size.width - origin.x, size.height - origin.y) - (max(majorThick, twidth) / 2)
         
-        if let view = RenderViewReference {
-            view.removeFromSuperview()
-            
-            addSubview(view)
-            var ypos = origin.y
-            if (compat_yScalar == -1) {
-                ypos = size.height - origin.y - (length + majorThick / 2)
-            }
-            view.frame = Rect(x: origin.x, y: ypos, width: length + (majorThick / 2), height: length + (majorThick / 2))
-            
-            if let playground = view as? playgroundMetalView {
-                playground.updateViewer()
-            }
+        if let img = imageS {
+            updateImageFrame(img: img, origin: origin, size: size, length: length, majorThick: majorThick)
         }
         
         lines.append(Line(start: origin, end: Point(x: origin.x, y: origin.y + length), size: majorThick))
         lines.append(Line(start: origin, end: Point(x: origin.x + length, y: origin.y), size: majorThick))
-        let scalar:[CGFloat] = [0.7, 0.5, 1.0, 0.5, 0.7]
+        let scalar:[CGFloat] = [0.7, 0.4, 1.0, 0.4, 0.7]
         for i in 0...4 {
             let percentage = (CGFloat(i) / 4.0)
             let x = origin.x + percentage * length

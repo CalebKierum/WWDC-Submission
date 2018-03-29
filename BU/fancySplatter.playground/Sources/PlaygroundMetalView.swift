@@ -157,7 +157,5 @@ public class playgroundMetalView:View {
     func debug() -> MTLTexture {
         return ensure(drawable)
     }
-    
-    var viewLayer:CALayer?
 }
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Timeline
+   version = "3.0">
+   <TimelineItems>
+      <LoggerValueHistoryTimelineItem
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/fancySplatter.playground#CharacterRangeLen=0&amp;CharacterRangeLoc=7003&amp;EndingColumnNumber=22&amp;EndingLineNumber=174&amp;StartingColumnNumber=22&amp;StartingLineNumber=174&amp;Timestamp=544008209.228997"
+         selectedRepresentationIndex = "0"
+         shouldTrackSuperviewWidth = "NO">
+      </LoggerValueHistoryTimelineItem>
+      <LoggerValueHistoryTimelineItem
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/fancySplatter.playground#CharacterRangeLen=5&amp;CharacterRangeLoc=7060&amp;EndingColumnNumber=10&amp;EndingLineNumber=177&amp;StartingColumnNumber=5&amp;StartingLineNumber=177&amp;Timestamp=544008209.2291369"
+         selectedRepresentationIndex = "0"
+         shouldTrackSuperviewWidth = "NO">
+      </LoggerValueHistoryTimelineItem>
+   </TimelineItems>
+</Timeline>

@@ -79,6 +79,12 @@ import Metal
 //    }
 //}
 //func synchronize(texture: MTLTexture, buffer: MTLCommandBuffer) {}
+//public func liveWidth() -> CGFloat {
+//    return UIScreen.main.bounds.width
+//}
+//public func liveHeight() -> CGFloat {
+//    return UIScreen.main.bounds.height
+//}
 
 import Cocoa
 public typealias Color = NSColor
@@ -120,5 +126,56 @@ extension playgroundMetalView {
 }
 extension NSView {
     var backgroundColor:Color { get { return NSColor.red } set {}  }
+}
+public func liveWidth() -> CGFloat {
+    return 500
+}
+public func liveHeight() -> CGFloat {
+    return 300
+}
+public class GridHolder:ViewController {
+    public var grid:GridView
+    
+    public init () {
+        grid = GridView(size: 300)
+        grid.translatesAutoresizingMaskIntoConstraints  = false
+        super.init(nibName: nil, bundle: nil)
+        view = View(frame: Rect(x: 0, y: 0, width: liveWidth(), height: liveHeight()))
+        view.addSubview(grid)
+    }
+    
+    public override func viewWillAppear() {
+        /*public override func viewDidLayoutSubviews() {
+         super.viewDidLayoutSubviews()
+         */
+        //let size = min(view.frame.width, view.frame.height)
+        let size = min(liveWidth(), liveHeight())
+        view.frame = Rect(x: 0, y: 0, width: liveWidth(), height: liveHeight())
+        view.layer?.backgroundColor = NSColor.black.cgColor
+        
+        let center = Point(x: view.frame.width / 2, y: view.frame.height / 2)
+        
+        grid.frame = Rect(x: center.x - (size / 2), y: center.y - (size / 2), width: size, height: size)
+    }
+    required public init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    public func view(image: Image) {
+        grid.view(image: image)
+    }
+}
+extension GridView {
+    public func updateImageFrame(img: Image, origin: Point, size: Size, length: CGFloat, majorThick: CGFloat) {
+        var ypos = origin.y
+        if (compat_yScalar == -1) {
+            ypos = size.height - origin.y - (length + majorThick / 2)
+        }
+        imageView!.frame = Rect(x: origin.x, y: ypos, width: length + (majorThick / 2), height: length + (majorThick / 2))
+        
+        imageView!.layer = CALayer()
+        imageView!.layer!.contentsGravity = kCAGravityResizeAspectFill
+        imageView!.layer!.contents = img
+        imageView!.wantsLayer = true
+    }
 }
 

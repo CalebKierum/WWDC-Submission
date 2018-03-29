@@ -15,46 +15,35 @@ enum States {
     case Computing
 }
 
-public class playgroundMetalView:View {
+public class metalState {
     private var device:MTLDevice? = nil
     private var queue:MTLCommandQueue? = nil
     private var state:States = .Idle
     private var buffer:MTLCommandBuffer? = nil
-    public var drawable:MTLTexture? = nil
     private var clear:MTLClearColor = MTLClearColorMake(0, 0, 0, 1.0)
-    private var dimensions:Rect? = nil
-    private var defaultRenderPassDescriptor:MTLRenderPassDescriptor? = nil
     internal static var sharedDevice:MTLDevice? = nil
     private var shouldDrawBlank:Bool = true
-    public var textureView:MTLTexture? = nil
+    public var drawable:MTLTexture? = nil
     
-    
-    public init (size: CGFloat) {
-        let frame = Rect(x: 0, y: 0, width: size, height: size)
-        dimensions = frame
-        super.init(frame: frame)
+    public init () {
         device = ensure(MTLCreateSystemDefaultDevice())
-        playgroundMetalView.sharedDevice = device
-        drawable = TextureTools.createTexture(ofSize: size)
-        defaultRenderPassDescriptor = renderPassDescriptor()
+        metalState.sharedDevice = device
         queue = device?.makeCommandQueue()
     }
-    private func renderPassDescriptor() -> MTLRenderPassDescriptor {
-        let descriptor = MTLRenderPassDescriptor()
-        descriptor.colorAttachments[0].texture = drawable
-        descriptor.colorAttachments[0].loadAction = MTLLoadAction.clear
-        descriptor.colorAttachments[0].storeAction = MTLStoreAction.store
-        descriptor.colorAttachments[0].clearColor = clear
-        return descriptor
+    private func renderPassDescriptor() -> MTLRenderPassDescriptor? {
+        if let draw = drawable {
+            let descriptor = MTLRenderPassDescriptor()
+            descriptor.colorAttachments[0].texture = draw
+            descriptor.colorAttachments[0].loadAction = MTLLoadAction.clear
+            descriptor.colorAttachments[0].storeAction = MTLStoreAction.store
+            descriptor.colorAttachments[0].clearColor = clear
+            return descriptor
+        }
+        return nil
     }
-    public required init?(coder decoder: NSCoder) {
-        super.init(coder: decoder)
-    }
-    
     public func setBackground(color: Color) {
         let intermediate = CIColor.convert(color: color)
         clear = MTLClearColor(red: Double(intermediate.red), green: Double(intermediate.green), blue: Double(intermediate.blue), alpha: 1.0)
-        defaultRenderPassDescriptor = renderPassDescriptor()
     }
     public func compileShader(named: String) -> MTLFunction {
         let shader = ensure(try String(contentsOf: #fileLiteral(resourceName: "Shaders.metal")))
@@ -101,9 +90,14 @@ public class playgroundMetalView:View {
         if (state != .Preparing) {
             playgroundError(message: "Invalid Command! Must be preparing current state is \(state)")
         }
-        shouldDrawBlank = false
-        state = .Rendering
-        return ensure(buffer?.makeRenderCommandEncoder(descriptor: renderPassDescriptor()))
+        if let desc = renderPassDescriptor() {
+            shouldDrawBlank = false
+            state = .Rendering
+            return ensure(buffer?.makeRenderCommandEncoder(descriptor: desc))
+        } else {
+            playgroundError(message: "You must have a drawable to draw to for a render command encoder")
+        }
+        fatalError("Error")
     }
     public func finishEncoding(encoder: MTLRenderCommandEncoder) {
         if (state != .Rendering) {
@@ -130,7 +124,7 @@ public class playgroundMetalView:View {
         if (state != .Preparing) {
             playgroundError(message: "Invalid Command! Must be preparing current state is \(state)")
         }
-        let screenUnits = (ammount / 2.0) * CGFloat(passIn.width)
+        let screenUnits = (ammount / (2.0 * 10.0)) * CGFloat(passIn.width)
         let kernel = MPSImageGaussianBlur(device: device!, sigma: Float(screenUnits))
         
         // not the safest way, but it works for brevity's sake
@@ -148,16 +142,6 @@ public class playgroundMetalView:View {
         buffer?.commit()
         buffer?.waitUntilCompleted()
         state = .Idle
-        viewDrawable()
     }
-    private func viewDrawable() {
-        updateViewer()
-    }
-    
-    func debug() -> MTLTexture {
-        return ensure(drawable)
-    }
-    
-    var viewLayer:CALayer?
 }
 

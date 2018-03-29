@@ -9,7 +9,7 @@ import Foundation
 import SpriteKit
 
 public func playgroundError(message: String) {
-    print(message)
+    fatalError(message)
 }
 
 
@@ -28,13 +28,13 @@ public func ensure<T>(_ expr: @autoclosure () throws -> T?, orError message: @au
 
 public class TextureTools {
     public static func createTexture(ofSize size: CGFloat) -> MTLTexture {
-        if (playgroundMetalView.sharedDevice == nil) {
+        if (metalState.sharedDevice == nil) {
             playgroundError(message: "Must create a metal device before creating a texture")
         }
         let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .rgba8Unorm, width: Int(size), height: Int(size), mipmapped: false)
         let usage:MTLTextureUsage = [MTLTextureUsage.shaderWrite, MTLTextureUsage.shaderRead, MTLTextureUsage.renderTarget]
         descriptor.usage = usage
-        return ensure(playgroundMetalView.sharedDevice?.makeTexture(descriptor: descriptor))
+        return ensure(metalState.sharedDevice?.makeTexture(descriptor: descriptor))
     }
 }
 
