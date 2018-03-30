@@ -7,35 +7,34 @@ import MetalKit
 
 let mtl = metalState()
 
-let buffer2 = GeometryCreator.splat(center: Point(x: 0, y: 0), color: Color.red)
+let buffer2 = GeometryCreator.splat(center: Point(x: 0, y: 0), color: Color.white)
 
-let vertex = mtl.compileShader(named: "vertexShader")
-let fragment = mtl.compileShader(named: "fragmentShader")
-let pipeline = mtl.createRenderPipeline(vertex: vertex, fragment: fragment)
+
 mtl.setBackground(color: Color.black)
 mtl.prepareFrame()
-let bgTexture = TextureTools.createTexture(ofSize: 5000)
-let img = Image(named: "Square.png")!
+let bgTexture = TextureTools.createTexture(ofSize: 4000)
+let img = Image(named: "perlin.png")!
 let tex2 = TextureTools.loadTexture(image: img)
-mtl.drawable = bgTexture
-//mtl.drawable = tex2
 
-let render =  mtl.getDefaultRenderEncoder()
 
-render.setRenderPipelineState(pipeline)
-render.drawTriangles(buffer: buffer2)
+mtl.draw(geometry: buffer2, to: bgTexture)
 
-mtl.finishEncoding(encoder: render)
 mtl.blur(texture: bgTexture, ammount: 0.5)
+
+var textua2 = mtl.combine(blurred: bgTexture, weight: 1.0, noise: tex2, weight: 0.2, color: Color.white)
+mtl.clamp(texture: &textua2, wall: 0.9, tolerance: 0.1)
+
 mtl.finishFrame()
 
 
 let pvc = GridHolder()
 pvc.gridOn()
 
-pvc.view(image: bgTexture.displayInPlayground()!)
-pvc.view(image: tex2.displayInPlayground()!)
-pvc.gridOff()
+//pvc.view(image: bgTexture.displayInPlayground()!)
+//pvc.view(image: tex2.displayInPlayground()!)
+pvc.view(image: textua2.displayInPlayground()!)
+
+pvc.gridOn()
 
 PlaygroundPage.current.liveView = pvc
 

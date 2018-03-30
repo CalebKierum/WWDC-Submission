@@ -23,7 +23,9 @@ public class metalState {
     private var clear:MTLClearColor = MTLClearColorMake(0, 0, 0, 1.0)
     internal static var sharedDevice:MTLDevice? = nil
     private var shouldDrawBlank:Bool = true
-    public var drawable:MTLTexture? = nil
+    private var drawable:MTLTexture?
+    
+    private var synchronizeList:[MTLTexture] = []
     
     public init () {
         device = ensure(MTLCreateSystemDefaultDevice())
@@ -40,6 +42,12 @@ public class metalState {
             return descriptor
         }
         return nil
+    }
+    public func setDrawable(to: MTLTexture) {
+        if let d = drawable {
+            synchronizeList.append(d)
+        }
+        drawable = to
     }
     public func setBackground(color: Color) {
         let intermediate = CIColor.convert(color: color)
@@ -86,7 +94,7 @@ public class metalState {
         descriptor.colorAttachments[0].clearColor = clear
         return ensure(buffer?.makeRenderCommandEncoder(descriptor: descriptor))
     }
-    public func getDefaultRenderEncoder() -> MTLRenderCommandEncoder {
+    public func getRenderEncoder() -> MTLRenderCommandEncoder {
         if (state != .Preparing) {
             playgroundError(message: "Invalid Command! Must be preparing current state is \(state)")
         }
@@ -131,13 +139,81 @@ public class metalState {
         var texture: MTLTexture = passIn
         kernel.encode(commandBuffer: buffer!, inPlaceTexture: &texture, fallbackCopyAllocator: nil)
     }
+    public func combine(blurred: MTLTexture, weight w1: Float, noise: MTLTexture, weight w2: Float, color: Color) -> MTLTexture {
+        if (state != .Preparing) {
+            playgroundError(message: "Invalid Command! Must be preparing current state is \(state)")
+        }
+        
+        let cvertex = compileShader(named: "vertex_copy")
+        let cfragment = compileShader(named: "fragment_copy")
+        let cpipeline = createRenderPipeline(vertex: cvertex, fragment: cfragment)
+        let ctex = TextureTools.createTexture(ofSize: CGFloat(max(blurred.width, noise.width)))
+        setDrawable(to: ctex)
+        let render = getRenderEncoder()
+        render.setRenderPipelineState(cpipeline)
+        render.setFragmentTexture(blurred, index: 0)
+        render.setFragmentTexture(noise, index: 1)
+        
+        var c_weight1 = w1
+        var c_weight2 = w2
+        let intermediate = CIColor.convert(color: color)
+        var color:float3 = float3(Float(intermediate.red), Float(intermediate.green), Float(intermediate.blue))
+        render.setFragmentBytes(&c_weight1, length: MemoryLayout<Float>.stride, index: 0)
+        render.setFragmentBytes(&c_weight2, length: MemoryLayout<Float>.stride, index: 1)
+        render.setFragmentBytes(&color, length: MemoryLayout<float3>.stride, index: 2)
+        
+        render.drawPrimitives(type: MTLPrimitiveType.triangle, vertexStart: 0, vertexCount: 6)
+        finishEncoding(encoder: render)
+        
+        return ctex
+    }
+    public func clamp(texture: inout MTLTexture, wall: CGFloat, tolerance: CGFloat) {
+        if (state != .Preparing) {
+            playgroundError(message: "Invalid Command! Must be preparing current state is \(state)")
+        }
+        
+        let cvertex = compileShader(named: "vertex_clamp")
+        let cfragment = compileShader(named: "fragment_clamp")
+        let cpipeline = createRenderPipeline(vertex: cvertex, fragment: cfragment)
+        let clamped = TextureTools.createTexture(ofSize: CGFloat(max(texture.width, texture.width)))
+        setDrawable(to: clamped)
+        let render2 = getRenderEncoder()
+        render2.setRenderPipelineState(cpipeline)
+        var wall:Float = Float(wall)
+        var tolerance:Float = Float(tolerance)
+        render2.setFragmentBytes(&wall, length: MemoryLayout<Float>.stride, index: 0)
+        render2.setFragmentBytes(&tolerance, length: MemoryLayout<Float>.stride, index: 1)
+        render2.setFragmentTexture(texture, index: 0)
+        render2.drawPrimitives(type: MTLPrimitiveType.triangle, vertexStart: 0, vertexCount: 6)
+        finishEncoding(encoder: render2)
+        
+        texture = clamped
+    }
+    public func draw(geometry: VertexBufferCreator, to: MTLTexture) {
+        if (state != .Preparing) {
+            playgroundError(message: "Invalid Command! Must be preparing current state is \(state)")
+        }
+        
+        let vertex = compileShader(named: "vertexShader")
+        let fragment = compileShader(named: "fragmentShader")
+        setDrawable(to: to)
+        let pipeline = createRenderPipeline(vertex: vertex, fragment: fragment)
+        let render =  getRenderEncoder()
+        render.setRenderPipelineState(pipeline)
+        render.drawTriangles(buffer: geometry)
+        finishEncoding(encoder: render)
+    }
     public func finishFrame() {
         if (state != .Preparing) {
             playgroundError(message: "Invalid Command! Must be preparing current state is \(state)")
         }
         if (shouldDrawBlank) {
-            finishEncoding(encoder: getDefaultRenderEncoder())
+            finishEncoding(encoder: getRenderEncoder())
         }
+        for tex in synchronizeList {
+            synchronize(texture: tex, buffer: buffer!)
+        }
+        synchronizeList = []
         synchronize(texture: drawable!, buffer: buffer!)
         buffer?.commit()
         buffer?.waitUntilCompleted()
