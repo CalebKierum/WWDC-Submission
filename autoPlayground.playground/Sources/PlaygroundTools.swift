@@ -9,6 +9,12 @@ import MetalKit
 import Foundation
 import SpriteKit
 
+public class SlotContants {
+    public static var totalScale:CGFloat = 0.25
+    public static var majorLow:CGFloat = 0.5
+    public static var sizeScalar:CGFloat = 1.0
+    public static var displacementScalar:CGFloat = 1.0
+}
 public func playgroundError(message: String) {
     fatalError(message)
 }

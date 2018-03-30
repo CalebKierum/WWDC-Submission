@@ -121,6 +121,7 @@ public class GridHolder:ViewController {
     }
     public func view(image: Image) {
         self.image = image
+        resize()
     }
     public func gridOff() {
         grid.gridOff()
@@ -182,7 +183,7 @@ extension TextureTools {
 //    }
 //}
 //public func liveWidth() -> CGFloat {
-//    return 500
+//    return 300
 //}
 //public func liveHeight() -> CGFloat {
 //    return 300
@@ -191,7 +192,7 @@ extension TextureTools {
 //    public var grid:GridView
 //
 //    public init () {
-//        grid = GridView(size: 300)
+//        grid = GridView(size: liveHeight())
 //        grid.translatesAutoresizingMaskIntoConstraints  = false
 //        super.init(nibName: nil, bundle: nil)
 //        view = View(frame: Rect(x: 0, y: 0, width: liveWidth(), height: liveHeight()))
@@ -264,4 +265,4 @@ extension TextureTools {
 //       self.init(named: NSImage.Name(named))
 //    }
 //}
-
+//

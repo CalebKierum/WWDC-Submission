@@ -29,23 +29,28 @@ public class GeometryCreator {
         let spaceScalar:CGFloat = 1
         
         //Scalars for the main blob
-        let practicalScalar = 0.25 * spaceScalar
+        let practicalScalar = SlotContants.totalScale * spaceScalar
         
         
         if (major) {
             //Central ball
-            let majorSize = Random.floatBiasHigh(factor: 4, start: 0.4, end: 1.0) * practicalScalar
+            let majorSize = Random.floatBiasHigh(factor: 4, start: SlotContants.majorLow, end: 1.0) * practicalScalar
             
             //-Bounded
             if (bounded) {
-                let size = Random.floatLinear(start: majorSize * 0.4, end: majorSize * 0.7)
-                let displacement = Random.floatLinear(start: majorSize * 0.6, end: majorSize * 0.8)
-                let theta = Random.randomRadian()
-                
-                var point = Point(x: cos(theta) * displacement, y: sin(theta) * displacement)
-                point += center
-                
-                buffer.addCircle(center: point, radius: size, color: color)
+                let count = Random.int(start: 1, end: 8)
+                for _ in 0..<count {
+                    let size = Random.floatLinear(start: majorSize * 0.4, end: majorSize * 0.7)
+                    var displacement = Random.floatLinear(start: majorSize * 0.6, end: majorSize * 0.8)
+                    let theta = Random.randomRadian()
+                    
+                    displacement *= SlotContants.displacementScalar
+                    
+                    var point = Point(x: cos(theta) * displacement, y: sin(theta) * displacement)
+                    point += center
+                    
+                    buffer.addCircle(center: point, radius: size * SlotContants.sizeScalar * 0.7, color: color)
+                }
             }
             
             //-Orbiters
@@ -60,76 +65,80 @@ public class GeometryCreator {
                     if (spinoffs && (Random.floatLinear(start: scalar / 2, end: 1.0) > scalar)) {
                         let spinCount = Random.int(start: 1, end: 4)
                         for _ in 0..<spinCount {
-                            let targetSize = majorSize / 3.0
+                            let targetSize = majorSize / 1.5
                             let displacementScale = Random.floatLinear()
-                            let displacement = majorSize + displacementScale * majorSize * 2
+                            var displacement = majorSize + displacementScale * majorSize * 2
                             let size = Random.floatLinear(start: targetSize * 0.5, end: targetSize) * pow(1 - displacementScale, 3.0)
                             
                             let mag:CGFloat = (2.0 * 3.141592) / 52.0
                             let waver = Random.floatLinear(start: -mag, end: mag)
+                            displacement *= SlotContants.displacementScalar
                             var point = Point(x: cos(theta + waver) * displacement, y: sin(theta + waver) * displacement)
                             point += center
                             
-                            buffer.addCircle(center: point, radius: size, color: color)
+                            buffer.addCircle(center: point, radius: size * SlotContants.sizeScalar, color: color)
                         }
                     }
                     
                     let size = Random.putInRange(scalar, start: targetSize * 0.85, end: targetSize * 1.0)
                     theta += Random.randomRadian()
-                    let displacement = Random.floatLinear(start: majorSize - size, end: majorSize * 1.1)
-                    
+                    var displacement = Random.floatLinear(start: majorSize - size, end: majorSize * 1.1)
+                    displacement *= SlotContants.displacementScalar
                     var point = Point(x: cos(theta) * displacement, y: sin(theta) * displacement)
                     point += center
                     
-                    buffer.addCircle(center: point, radius: size, color: color)
+                    buffer.addCircle(center: point, radius: size * SlotContants.sizeScalar * 0.9, color: color)
                 }
             }
             
             //-Random
             if (random) {
-                let randomCount = Random.int(start: 6, end: 13)
+                let randomCount = Random.int(start: 6, end: 15)
                 for _ in 0..<randomCount {
-                    let scalar = Random.floatBiasLow(factor: 1.5)
-                    let displacement = majorSize*1.1 + majorSize * 2.5 * scalar
-                    let targetSize = practicalScalar / 10
-                    let scale = targetSize * pow(1.0 - scalar, 2.0) * Random.floatLinear(start: 0.9, end: 1.1)
+                    let scalar = Random.floatLinear()
+                    var displacement = majorSize*1.4 + majorSize * 2.5 * scalar
+                    let targetSize = practicalScalar / 8.2
+                    let scale = targetSize * pow(1.0 - scalar, 1.2) * Random.floatLinear(start: 0.9, end: 1.0)
                     let theta = Random.randomRadian()
                     
+                    displacement *= SlotContants.displacementScalar
                     var point = Point(x: cos(theta) * displacement, y: sin(theta) * displacement)
                     point += center
                     
-                    buffer.addCircle(center: point, radius: scale, color: color)
+                    buffer.addCircle(center: point, radius: scale * SlotContants.sizeScalar, color: color)
                 }
             }
             
             //-Lines
             if (lines) {
-                let count = Random.int(start: 1, end: 12)
+                let count = Random.int(start: 1, end: 6)
                 for _ in 0..<count {
-                    let width = Random.floatBiasLow(factor: 1.2, start: majorSize * 0.1, end: majorSize * 0.3)
-                    let length = Random.floatBiasLow(factor: 2.0, start: majorSize * 0.1, end: majorSize * 1.2)
+                    let width = Random.floatBiasLow(factor: 1.2, start: practicalScalar * 0.12, end: practicalScalar * 0.13)
+                    let length = Random.floatBiasLow(factor: 1.5, start: majorSize * 0.4, end: majorSize * 1.5)
                     let theta = Random.randomRadian()
                     
                     let core = majorSize * 0.5
-                    let outset = majorSize + length
+                    var outset = majorSize + length
                     
                     var p1 = Point(x: cos(theta) * core, y: sin(theta) * core)
                     p1 += center
                     
-                    var p2 = Point(x: cos(theta) * outset, y: sin(theta) * outset)
+                    outset *= SlotContants.displacementScalar
+                    var p2 = Point(x: cos(theta) * outset, y: sin(theta) * outset * SlotContants.displacementScalar)
                     p2 += center
                     
-                    buffer.addLine(from: p1, to: p2, width: width, color: color)
+                    
+                    buffer.addLine(from: p1, to: p2, width: width * SlotContants.sizeScalar, color: color)
                     
                     
                     if (cap) {
-                        let width = width * Random.floatLinear(start: 1.2, end: 1.5)
-                        buffer.addCircle(center: p2, radius: width, color: color)
+                        let width = width * Random.floatLinear(start: 1.00, end: 1.1)
+                        buffer.addCircle(center: p2, radius: width * SlotContants.sizeScalar, color: color)
                     }
                 }
             }
             
-            buffer.addCircle(center: center, radius: majorSize, color: color)
+            buffer.addCircle(center: center, radius: majorSize  * SlotContants.sizeScalar * 1.1, color: color)
         }
         return buffer
     }

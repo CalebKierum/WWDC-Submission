@@ -89,7 +89,7 @@ fragment float4 fragment_copy(texture2d<float> texture1 [[texture(0)]],
                                    t_address::mirrored_repeat,
                                    r_address::mirrored_repeat);
     
-    return float4(clamp(0.0, 1.0, texture1.sample(colorSampler, texCoord.texCoord).rgb * w1i + texture2.sample(colorSampler, texCoord.texCoord).r * w2i * wcolor), 1.0);
+    return float4(clamp(0.0, 1.0, texture1.sample(colorSampler, texCoord.texCoord).rgb * w1i + texture2.sample(colorSampler, texCoord.texCoord * 0.5).r * w2i * wcolor), 1.0);
 }
 vertex ColorInOut vertex_clamp(uint vid [[vertex_id]]) {
     const float2 coords[] = {float2(-1.0, -1.0),
@@ -132,6 +132,6 @@ fragment float4 fragment_clamp(texture2d<float> texture1 [[texture(0)]],
     float4 col = texture1.sample(colorSampler, texCoord.texCoord);
     float mag = length(col.rgb);
     float fxn = smoothstep(wallc - tolerancec, wallc + tolerancec, mag);
-    return float4(float3(col.rgb * fxn), col.a);
+    return float4(float3(fxn), fxn);
 }
 

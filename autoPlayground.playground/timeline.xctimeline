@@ -3,7 +3,12 @@
    version = "3.0">
    <TimelineItems>
       <LoggerValueHistoryTimelineItem
-         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/autoPlayground.playground#CharacterRangeLen=0&amp;CharacterRangeLoc=931&amp;EndingColumnNumber=20&amp;EndingLineNumber=38&amp;StartingColumnNumber=20&amp;StartingLineNumber=38&amp;Timestamp=544085154.518532"
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/autoPlayground.playground#CharacterRangeLen=0&amp;CharacterRangeLoc=1483&amp;EndingColumnNumber=17&amp;EndingLineNumber=52&amp;StartingColumnNumber=17&amp;StartingLineNumber=52&amp;Timestamp=544097605.879214"
+         selectedRepresentationIndex = "0"
+         shouldTrackSuperviewWidth = "NO">
+      </LoggerValueHistoryTimelineItem>
+      <LoggerValueHistoryTimelineItem
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/autoPlayground.playground#CharacterRangeLen=3&amp;CharacterRangeLoc=1103&amp;EndingColumnNumber=6&amp;EndingLineNumber=36&amp;StartingColumnNumber=3&amp;StartingLineNumber=36&amp;Timestamp=544097605.879348"
          selectedRepresentationIndex = "0"
          shouldTrackSuperviewWidth = "NO">
       </LoggerValueHistoryTimelineItem>
