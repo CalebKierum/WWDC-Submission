@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Timeline
+   version = "3.0">
+   <TimelineItems>
+      <LoggerValueHistoryTimelineItem
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/splat.playground#CharacterRangeLen=0&amp;CharacterRangeLoc=840&amp;EndingColumnNumber=24&amp;EndingLineNumber=32&amp;StartingColumnNumber=24&amp;StartingLineNumber=32&amp;Timestamp=544219848.567162"
+         selectedRepresentationIndex = "0"
+         shouldTrackSuperviewWidth = "NO">
+      </LoggerValueHistoryTimelineItem>
+      <LoggerValueHistoryTimelineItem
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/splat.playground#CharacterRangeLen=0&amp;CharacterRangeLoc=479&amp;EndingColumnNumber=12&amp;EndingLineNumber=19&amp;StartingColumnNumber=12&amp;StartingLineNumber=19&amp;Timestamp=544219848.567301"
+         selectedRepresentationIndex = "0"
+         shouldTrackSuperviewWidth = "NO">
+      </LoggerValueHistoryTimelineItem>
+      <LoggerValueHistoryTimelineItem
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/splat.playground#CharacterRangeLen=11&amp;CharacterRangeLoc=433&amp;EndingColumnNumber=0&amp;EndingLineNumber=18&amp;StartingColumnNumber=23&amp;StartingLineNumber=17&amp;Timestamp=544219848.5674469"
+         selectedRepresentationIndex = "0"
+         shouldTrackSuperviewWidth = "NO">
+      </LoggerValueHistoryTimelineItem>
+      <LoggerValueHistoryTimelineItem
+         documentLocation = "file:///Users/Caleb/Coding/XCode/Tests/WWDC-Submission/splat.playground#CharacterRangeLen=9&amp;CharacterRangeLoc=421&amp;EndingColumnNumber=20&amp;EndingLineNumber=17&amp;StartingColumnNumber=11&amp;StartingLineNumber=17&amp;Timestamp=544219848.5675859"
+         selectedRepresentationIndex = "0"
+         shouldTrackSuperviewWidth = "NO">
+      </LoggerValueHistoryTimelineItem>
+   </TimelineItems>
+</Timeline>
