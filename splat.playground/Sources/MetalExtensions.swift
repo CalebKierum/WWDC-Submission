@@ -14,7 +14,19 @@ extension MTLRenderCommandEncoder {
     }
 
 }
-
+class bufferHolder {
+    static var buffers:[Int : UnsafeMutableRawPointer] = [Int : UnsafeMutableRawPointer]()
+    static func get(size: Int) -> UnsafeMutableRawPointer {
+        if let curr = buffers[size] {
+            return curr
+        } else {
+            let create = size * size * 4
+            let data = UnsafeMutableRawPointer.allocate(bytes: create, alignedTo: 1)
+            buffers[size] = data
+            return data
+        }
+    }
+}
 public extension MTLTexture {
     func displayInPlayground() -> Image? {
         let texture = self
@@ -22,20 +34,20 @@ public extension MTLTexture {
         let height = texture.height
         let bytesPerRow = width * 4
         
-        let data = UnsafeMutableRawPointer.allocate(byteCount: bytesPerRow * height, alignment: 4)
-        defer {
-            data.deallocate()
-        }
+        let data = bufferHolder.get(size: width)
         
         let region = MTLRegionMake2D(0, 0, width, height)
         texture.getBytes(data, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
-        var buffer = vImage_Buffer(data: data, height: UInt(height), width: UInt(width), rowBytes: bytesPerRow)
         
-        var map: [UInt8] = [0, 1, 2, 3]
+        
+        
+        
         if (pixelFormat == .bgra8Unorm) {
-            map = [2, 1, 0, 3]
+            let map:[UInt8] = [2, 1, 0, 3]
+            var buffer = vImage_Buffer(data: data, height: UInt(height), width: UInt(width), rowBytes: bytesPerRow)
+            vImagePermuteChannels_ARGB8888(&buffer, &buffer, map, 0)
         }
-        vImagePermuteChannels_ARGB8888(&buffer, &buffer, map, 0)
+        
         
         guard let colorSpace = CGColorSpace(name: CGColorSpace.genericRGBLinear) else { return nil }
         guard let context = CGContext(data: data, width: width, height: height, bitsPerComponent: 8, bytesPerRow: bytesPerRow, space: colorSpace, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { return nil }

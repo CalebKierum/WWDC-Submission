@@ -14,6 +14,6 @@ public class Settings {
 public class SlotContants {
     public static var totalScale:CGFloat = 0.13
     public static var majorLow:CGFloat = 0.9
-    public static var sizeScalar:CGFloat = 0.9
+    public static var sizeScalar:CGFloat = 0.8//0.9
     public static var displacementScalar:CGFloat = 1.4
 }

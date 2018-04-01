@@ -47,7 +47,7 @@ fragment float4 step(texture2d<float> current [[texture(0)]],
     float4 curr = current.sample(colorSampler, texCoord.texCoord);
     
     //3
-    float2 scalar = float2(6.0 * (1.0 / 800.0));
+    float2 scalar = float2(3.0 * (1.0 / 800.0));
     float2 tc = texCoord.texCoord;
     float4 col = current.sample(colorSampler, tc);
     float4 l = current.sample(colorSampler, tc + float2(-1.0, 0.0) * scalar);
@@ -76,11 +76,18 @@ fragment float4 step(texture2d<float> current [[texture(0)]],
     
     //Decide how much of our color mixes with the outside colors
     float porous = min(1.0, min(0.5,(col.a+avg.a)*0.9)*3.0);
-    col.xyz = mix(col.xyz,avg.xyz,porous*0.5);
+    col.xyz = mix(col.xyz,avg.xyz,porous*0.05);
     col.w = mix(col.w,avg.w,porous) * (1.0 / cap);
     
     col.w /= (1.0 + (0.03));
     return col;
+}
+float3 adjust(float3 in) {
+    float maxv = max(in.x, max(in.y, in.z));
+    if (maxv > 1.0) {
+        return in / maxv;
+    }
+    return in;
 }
 fragment float4 paint(texture2d<float> current [[texture(0)]],
                       texture2d<float> splat [[texture(1)]],
@@ -109,7 +116,13 @@ fragment float4 paint(texture2d<float> current [[texture(0)]],
     //return splat.sample(colorSampler, texCoord.texCoord);*/
     float adj = strength;
     
-    float mixAmmount = 0.2 * (curr.a * (cap / 1.0));
-    float3 mi = 1.0 - (((1.0 - paint) + (1.0 - curr.xyz) * mixAmmount) / (1.0 + mixAmmount));
+    //float mixAmmount = 0.2 * (curr.a * (cap / 1.0));
+    //float3 mi = (((paint) + (curr.xyz) * mixAmmount) / (1.0 + mixAmmount));
+    float3 cmy_curr = adjust(1.0 - curr.xyz);
+    float3 cmy_paint = adjust(paint);
+    float3 cmy_result = adjust(cmy_curr * adj * 0.2 + cmy_paint);
+    float3 rgb_result = 1.0 - cmy_result;
+    //return float4(rgb_result, adj * 10.0 * (1.0 / cap) + curr.a);
+    float3 mi = sqrt(mix(curr.xyz * curr.xyz, paint * paint, 1.0 - smoothstep(0.8, 1.0, curr.a) * 0.2));
     return float4(float3(mi * adj + (1.0 - adj) * curr.xyz), adj * 10.0 * (1.0 / cap) + curr.a);
 }

@@ -23,33 +23,68 @@ public class metalState {
     private var clear:MTLClearColor = MTLClearColorMake(0, 0, 0, 1.0)
     public static var sharedDevice:MTLDevice? = nil
     private var shouldDrawBlank:Bool = true
-    private var drawable:MTLTexture?
+    private var drawable:MTLTexture? = nil
     
     private var synchronizeList:[MTLTexture] = []
     
+    private var copy_pipeline:MTLRenderPipelineState? = nil
+    private var clamp_pipeline:MTLRenderPipelineState? = nil
+    private var alpha_pipeline:MTLRenderPipelineState? = nil
+    private var draw_pipeline:MTLRenderPipelineState? = nil
+    
     public init () {
-        device = getHighPoweredDev()
-        metalState.sharedDevice = device
-        queue = device?.makeCommandQueue()
+        let dev = getHighPoweredDev()
+        device = dev
+        metalState.sharedDevice = dev
+        queue = dev.makeCommandQueue()
+        
+        let shader = ensure(try String(contentsOf: #fileLiteral(resourceName: "Shaders.metal")))
+        
+        let library = ensure(try dev.makeLibrary(source: shader, options: nil))
+        
+        let copy_vertex = ensure(library.makeFunction(name: "vertex_copy"))
+        let copy_fragment = ensure(library.makeFunction(name: "fragment_copy"))
+        
+        let alpha_vertex = ensure(library.makeFunction(name: "vertex_alpha"))
+        let alpha_fragment = ensure(library.makeFunction(name: "fragment_alpha"))
+        
+        let clamp_vertex = ensure(library.makeFunction(name: "vertex_clamp"))
+        let clamp_fragment = ensure(library.makeFunction(name: "fragment_clamp"))
+        
+        let draw_vertex = ensure(library.makeFunction(name: "vertexShader"))
+        let draw_fragment = ensure(library.makeFunction(name: "fragmentShader"))
+        
+        copy_pipeline = createRenderPipeline(vertex: copy_vertex, fragment: copy_fragment)
+        alpha_pipeline = createRenderPipeline(vertex: alpha_vertex, fragment: alpha_fragment)
+        clamp_pipeline = createRenderPipeline(vertex: clamp_vertex, fragment: clamp_fragment)
+        draw_pipeline = createRenderPipeline(vertex: draw_vertex, fragment: draw_fragment)
     }
     public func getState() -> States{
         return state
     }
+    private var cache:MTLRenderPassDescriptor?
     private func renderPassDescriptor() -> MTLRenderPassDescriptor? {
+        if (!invalid && cache != nil) {
+            return cache!
+        }
         if let draw = drawable {
             let descriptor = MTLRenderPassDescriptor()
             descriptor.colorAttachments[0].texture = draw
             descriptor.colorAttachments[0].loadAction = MTLLoadAction.clear
             descriptor.colorAttachments[0].storeAction = MTLStoreAction.store
             descriptor.colorAttachments[0].clearColor = clear
+            cache = descriptor
             return descriptor
         }
+        cache = nil
         return nil
     }
+    private var invalid:Bool = false
     public func setDrawable(to: MTLTexture) {
         if let d = drawable {
             synchronizeList.append(d)
         }
+        invalid = true
         drawable = to
     }
     public func setBackground(color: Color) {
@@ -70,8 +105,6 @@ public class metalState {
         pipelineDescriptor.sampleCount = Settings.sampleCount
         pipelineDescriptor.vertexFunction = vertex
         pipelineDescriptor.fragmentFunction = fragment
-        
-        
         pipelineDescriptor.colorAttachments[0].pixelFormat = Settings.colorFormat
         
         return ensure(try device?.makeRenderPipelineState(descriptor: pipelineDescriptor))
@@ -83,19 +116,6 @@ public class metalState {
         state = .Preparing
         shouldDrawBlank = true
         buffer = ensure(queue?.makeCommandBuffer())
-    }
-    public func getRenderEncoderFor(texture: MTLTexture) -> MTLRenderCommandEncoder {
-        if (state != .Preparing) {
-            playgroundError(message: "Invalid Command! Must be preparing current state is \(state)")
-        }
-        shouldDrawBlank = false
-        state = .Rendering
-        let descriptor = MTLRenderPassDescriptor()
-        descriptor.colorAttachments[0].texture = texture
-        descriptor.colorAttachments[0].loadAction = MTLLoadAction.clear
-        descriptor.colorAttachments[0].storeAction = MTLStoreAction.store
-        descriptor.colorAttachments[0].clearColor = clear
-        return ensure(buffer?.makeRenderCommandEncoder(descriptor: descriptor))
     }
     public func getRenderEncoder() -> MTLRenderCommandEncoder {
         if (state != .Preparing) {
@@ -147,9 +167,8 @@ public class metalState {
             playgroundError(message: "Invalid Command! Must be preparing current state is \(state)")
         }
         
-        let cvertex = compileShader(named: "vertex_copy")
-        let cfragment = compileShader(named: "fragment_copy")
-        let cpipeline = createRenderPipeline(vertex: cvertex, fragment: cfragment)
+        
+        let cpipeline = copy_pipeline!
         var ctex:MTLTexture!
         if let t = onto {
             ctex = t
@@ -180,9 +199,8 @@ public class metalState {
             playgroundError(message: "Invalid Command! Must be preparing current state is \(state)")
         }
         shouldDrawBlank = false
-        let cvertex = compileShader(named: "vertex_alpha")
-        let cfragment = compileShader(named: "fragment_alpha")
-        let cpipeline = createRenderPipeline(vertex: cvertex, fragment: cfragment)
+        
+        let cpipeline = alpha_pipeline!
         setDrawable(to: onto)
         let render = getRenderEncoder()
         render.setRenderPipelineState(cpipeline)
@@ -195,9 +213,8 @@ public class metalState {
             playgroundError(message: "Invalid Command! Must be preparing current state is \(state)")
         }
         
-        let cvertex = compileShader(named: "vertex_clamp")
-        let cfragment = compileShader(named: "fragment_clamp")
-        let cpipeline = createRenderPipeline(vertex: cvertex, fragment: cfragment)
+        
+        let cpipeline = clamp_pipeline!
         var clamped:MTLTexture!
         if let t = onto {
             clamped = t
@@ -222,10 +239,9 @@ public class metalState {
             playgroundError(message: "Invalid Command! Must be preparing current state is \(state)")
         }
         
-        let vertex = compileShader(named: "vertexShader")
-        let fragment = compileShader(named: "fragmentShader")
+        
         setDrawable(to: to)
-        let pipeline = createRenderPipeline(vertex: vertex, fragment: fragment)
+        let pipeline = draw_pipeline!
         let render =  getRenderEncoder()
         render.setRenderPipelineState(pipeline)
         render.drawTriangles(buffer: geometry)

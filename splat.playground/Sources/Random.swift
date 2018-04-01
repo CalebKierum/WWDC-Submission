@@ -2,42 +2,45 @@
 import Foundation
 import SpriteKit
 
-extension MutableCollection {
-    /// Shuffles the contents of this collection.
+extension Array {
     mutating func shuffle() {
-        let c = count
-        guard c > 1 else { return }
-        
-        for (firstUnshuffled, unshuffledCount) in zip(indices, stride(from: c, to: 1, by: -1)) {
-            let d: Int = numericCast(arc4random_uniform(numericCast(unshuffledCount)))
-            let i = index(firstUnshuffled, offsetBy: d)
-            swapAt(firstUnshuffled, i)
+        for _ in 0..<((count>0) ? (count-1) : 0) {
+            sort { (_,_) in arc4random() < arc4random() }
         }
     }
 }
 
 public class Random {
     private static var pot:[CGFloat] = []
-    private static var index:Int = 0
+    private static var poker:Int = 0
     public static func initialize() {
-        index = 0
+        poker = 0
         let res = 200
-        for i in 0..<res {
+        for i in 0...res {
             let value = CGFloat(i) / CGFloat(res)
             pot.append(value)
         }
         pot.shuffle()
+        stir()
     }
     public static func stir() {
-        pot.shuffle()
-        index = 0
+        //pot.shuffle()
+        for _ in 0..<30 {
+            swap(index1: int(start: 0, end: 199), index2: int(start: 0, end: 199))
+        }
+        poker = int(start: 0, end: 200)
+    }
+    private static func swap(index1: Int, index2: Int) {
+        let num1 = pot[index1]
+        pot[index1] = pot[index2]
+        pot[index2] = num1
     }
     public static func floatLinear(start: CGFloat = 0, end: CGFloat = 1) -> CGFloat {
-        index += 1
-        if (index > pot.count - 2) {
+        poker += 1
+        if (poker > pot.count - 2) {
             stir()
         }
-        return putInRange(pot[index], start: start, end: end)
+        return putInRange(pot[poker], start: start, end: end)
     }
     
     public static func floatBiasLow(factor: CGFloat, start: CGFloat = 0, end: CGFloat = 1) -> CGFloat {
