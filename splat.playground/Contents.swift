@@ -1,30 +1,23 @@
 //: Playground - noun: a place where people can play
 
 import PlaygroundSupport
-import Foundation
-import SpriteKit
-import MetalKit
 
+//Initial
 Random.initialize()
-
-let pvc = GridHolder()
-let mtl = metalState()
-let water = WatercolorSimulation(state: mtl, resolution: 850)
-pvc.waterDelegate = water
-mtl.setBackground(color: Color.black)
-pvc.gridOn()
-func newSplat() {
-    //let framerate = 1.0 / FPS.frame()
+let gridViewController = GridHolder()
+let metal = metalState()
+let water = WatercolorSimulation(state: metal, resolution: 850)
+gridViewController.waterDelegate = water
+gridViewController.gridOn()
+func simulate() {
+    metal.prepareFrame()
     
-    mtl.prepareFrame()
+    let result = water.simulate()
     
-    let res = water.simulate()
-    
-    mtl.finishFrame()
-    pvc.view(image: res!.displayInPlayground()!)
+    metal.finishFrame()
+    gridViewController.view(image: result!.displayInPlayground()!)
 }
 
+PlaygroundPage.current.liveView = gridViewController
 
-PlaygroundPage.current.liveView = pvc
-
-executeContinuously(block: newSplat)
+executeContinuously(block: simulate)

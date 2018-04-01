@@ -1,14 +1,20 @@
 #include <metal_stdlib>
 #include <simd/simd.h>
 using namespace metal;
-//How much water is the "Max water"
+
+//NOTE: a channel represents wetness
+
+//How much water is the "Max water" cap
 constant float cap = 4.0;
+
+//Holds a color and a position
 typedef struct
 {
     float4 position [[position]];
     float2 texCoord;
 } ColorInOut;
 
+//Main vertex for all full screen things
 vertex ColorInOut main_vertex(uint vid [[vertex_id]]) {
     const float2 coords[] = {float2(-1.0, -1.0),
         float2(1.0, -1.0),
@@ -26,6 +32,8 @@ vertex ColorInOut main_vertex(uint vid [[vertex_id]]) {
     out.position = float4(coords[lu[vid]], 0.0, 1.0);
     return out;
 }
+
+//Sets the texture passed in to white with 0 wetness
 fragment float4 clear(ColorInOut texCoord [[stage_in]]) {
     
     constexpr sampler colorSampler(mip_filter::linear,
@@ -36,6 +44,8 @@ fragment float4 clear(ColorInOut texCoord [[stage_in]]) {
                                    r_address::mirrored_repeat);
     return float4(1.0, 1.0, 1.0, 0.0);
 }
+
+//Steps the simulation by one frame
 fragment float4 step(texture2d<float> current [[texture(0)]],
                      ColorInOut texCoord [[stage_in]]) {
     constexpr sampler colorSampler(mip_filter::linear,
@@ -44,22 +54,31 @@ fragment float4 step(texture2d<float> current [[texture(0)]],
                                    s_address::mirrored_repeat,
                                    t_address::mirrored_repeat,
                                    r_address::mirrored_repeat);
+    
+    //Get the current color at the current location in the canvas
     float4 curr = current.sample(colorSampler, texCoord.texCoord);
     
-    //3
+    //How far we look for adjacent things in the water
     float2 scalar = float2(3.0 * (1.0 / 800.0));
+    
+    //The texture coordinate of the water
     float2 tc = texCoord.texCoord;
+    
+    //Colors from current location and things around it
     float4 col = current.sample(colorSampler, tc);
     float4 l = current.sample(colorSampler, tc + float2(-1.0, 0.0) * scalar);
     float4 r = current.sample(colorSampler, tc + float2(1.0, 0.0) * scalar);
     float4 u = current.sample(colorSampler, tc + float2(0.0, 1.0) * scalar);
     float4 d = current.sample(colorSampler, tc + float2(0.0, -1.0) * scalar);
+    
+    //Adjust all of the alpha values to consider the caps of water levels to alpha
     l.a *= (cap / 1.0);
     col.a *= (cap / 1.0);
     r.a *= (cap / 1.0);
     u.a *= (cap / 1.0);
     d.a *= (cap / 1.0);
     
+    //Clamp the wentess that travels to adjacent cells
     float wetnessClamp = 0.2;
     float il = clamp(l.a - col.a,0.0,wetnessClamp);
     float ir = clamp(r.a - col.a,0.0,wetnessClamp);
@@ -71,7 +90,6 @@ fragment float4 step(texture2d<float> current [[texture(0)]],
     col.xyz = (il*l.xyz)+(ir*r.xyz)+(iu*u.xyz)+(id*d.xyz)+myContrib*col.rgb;
     
     //Average all the surronding pigments
-    //vec4 avg = sqrt((l*l + d*d+r*r+u*u)*0.25);
     float4 avg = (l + d + r + u) * 0.25;
     
     //Decide how much of our color mixes with the outside colors
@@ -79,16 +97,12 @@ fragment float4 step(texture2d<float> current [[texture(0)]],
     col.xyz = mix(col.xyz,avg.xyz,porous*0.05);
     col.w = mix(col.w,avg.w,porous) * (1.0 / cap);
     
+    //The paint dries gradually
     col.w /= (1.0 + (0.03));
     return col;
 }
-float3 adjust(float3 in) {
-    float maxv = max(in.x, max(in.y, in.z));
-    if (maxv > 1.0) {
-        return in / maxv;
-    }
-    return in;
-}
+
+//Paints the input texture onto the canvas texture
 fragment float4 paint(texture2d<float> current [[texture(0)]],
                       texture2d<float> splat [[texture(1)]],
                       constant float3 &color [[ buffer(0) ]],
@@ -104,25 +118,7 @@ fragment float4 paint(texture2d<float> current [[texture(0)]],
     float strength = splat.sample(colorSampler, texCoord.texCoord).r;
     float3 paint = strength * color;
     
-    /*float3 col = sqrt(mix(curr.xyz * curr.xyz, paint * paint, 0.8));
-    float wetness = 0.0;
-    if (strength < 0.001) {
-        col = curr.xyz;
-    } else {
-        //col = color;
-        wetness = 1.0;
-    }
-    return float4(col, wetness);
-    //return splat.sample(colorSampler, texCoord.texCoord);*/
     float adj = strength;
-    
-    //float mixAmmount = 0.2 * (curr.a * (cap / 1.0));
-    //float3 mi = (((paint) + (curr.xyz) * mixAmmount) / (1.0 + mixAmmount));
-    float3 cmy_curr = adjust(1.0 - curr.xyz);
-    float3 cmy_paint = adjust(paint);
-    float3 cmy_result = adjust(cmy_curr * adj * 0.2 + cmy_paint);
-    float3 rgb_result = 1.0 - cmy_result;
-    //return float4(rgb_result, adj * 10.0 * (1.0 / cap) + curr.a);
     float3 mi = sqrt(mix(curr.xyz * curr.xyz, paint * paint, 1.0 - smoothstep(0.8, 1.0, curr.a) * 0.2));
     return float4(float3(mi * adj + (1.0 - adj) * curr.xyz), adj * 10.0 * (1.0 / cap) + curr.a);
 }

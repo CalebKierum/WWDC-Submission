@@ -1,115 +1,218 @@
+//  WaterSim.swift
+//
+//  Created by Caleb on 3/22/18.
+//  Copyright © 2018 Caleb Kierum. All rights reserved.
+//
+
 import Metal
 import MetalKit
 
+//An enum storing queued up actions
+//A central design of this is that any method may be called when the metal state is not preparing so safe those commands for later
 enum Actions {
     case reset
     case paint(MTLTexture)
     case location(Point)
 }
+
+//The watercolor simulation itself
 public class WatercolorSimulation {
+    //Frame is used to switch between which texture is read and which is written
     private var frame:Int = 0
+    
+    //These textures switch of as read and write
     private var tex1:MTLTexture
     private var tex2:MTLTexture
+    
+    //The metal state we will use to draw
     private var state:metalState
+    
+    //Actions queued up until the state is preparing
     private var queue:[Actions] = []
+    
+    //The pipeline for stepping the simulation one frame
     private var step:MTLRenderPipelineState
+    
+    //The pipeline for clearing the simulation
     private var clear:MTLRenderPipelineState
+    
+    //The pipeline for painting a splat
     private var paint:MTLRenderPipelineState
+    
+    //Stores how many simulate calls are queued up
     private var simQueue:Int = 0
-    private var bgTexture:MTLTexture
+    
+    //The texture the splatter will be drawn to
+    private var splatterTexture:MTLTexture
+    
+    //Stores the two noise textures
     private var noise1:MTLTexture
     private var noise2:MTLTexture
+    
+    //These two textures are buffers used for various purposes
     private var combTex:MTLTexture
     private var combTex2:MTLTexture
+    
+    //Initialize this with a resolution and a metal state object to work wtih
     public init(state: metalState, resolution: CGFloat) {
+        
+        //Initialize all of the textures
         tex1 = TextureTools.createTexture(ofSize: resolution)
         tex2 = TextureTools.createTexture(ofSize: resolution)
-        bgTexture = TextureTools.createTexture(ofSize: resolution)
+        splatterTexture = TextureTools.createTexture(ofSize: resolution)
         combTex = TextureTools.createTexture(ofSize: resolution)
         combTex2 = TextureTools.createTexture(ofSize: resolution)
+        
+        //Save the passed in metal state
         self.state = state
         
+        //Read the shaders from Water.metal
         let shader = ensure(try String(contentsOf: #fileLiteral(resourceName: "Water.metal")))
         let library = ensure(try metalState.sharedDevice!.makeLibrary(source: shader, options: nil))
+        
+        //Get the functions
         let s_vertex = ensure(library.makeFunction(name: "main_vertex"))
         let s_clear = ensure(library.makeFunction(name: "clear"))
         let s_paint = ensure(library.makeFunction(name: "paint"))
         let s_simulate = ensure(library.makeFunction(name: "step"))
         
+        //Create the pipelines for everytihng
         step = state.createRenderPipeline(vertex: s_vertex, fragment: s_simulate)
         clear = state.createRenderPipeline(vertex: s_vertex, fragment: s_clear)
         paint = state.createRenderPipeline(vertex: s_vertex, fragment: s_paint)
         
+        //Load up the two noise images
         let img = Image(named: "NewNoise.png")!
         noise1 = TextureTools.loadTexture(image: img)
         let img2 = Image(named: "natural.png")!
         noise2 = TextureTools.loadTexture(image: img2)
         
+        //Reset the simulation
         reset()
     }
+    
+    //Makes the canvas white with no wetness
     public func reset() {
-        //If it can does immediately if not queues it up
+        
+        //State check!
         if (state.getState() == .Preparing) {
+            
+            //get the ouput texture
             let output = getOutput()
             
+            //Set the drawable to it
             state.setDrawable(to: output)
+            
+            //Get the command encoder
             let render = state.getRenderEncoder()
+            
+            //Set the state to the shader
             render.setRenderPipelineState(clear)
+            
+            //Draw
             render.drawFullScreen()
+            
+            //Finish encoding
             state.finishEncoding(encoder: render)
             
+            //Increase frame by one
             frame += 1
         } else {
+            //We are in the wrong state so queue it up
             queue = []
             queue.append(.reset)
         }
     }
+    
+    //Craetes a paintsplatter at the position and draws it to the canvas
     public func paintSplatter(pos: Point) {
+        
+        //State check!
         if (state.getState() == .Preparing) {
+            
+            //Create a splat geometry
             let buffer2 = GeometryCreator.splat(center: pos, color: Color.white)
             
-            state.draw(geometry: buffer2, to: bgTexture)
+            //Draw it to the texture
+            state.draw(geometry: buffer2, to: splatterTexture)
             
-            state.blur(texture: bgTexture, ammount: 0.2)
+            //Blur that texture
+            state.blur(texture: splatterTexture, ammount: SplatConstants.blurAmmount)
             
-            let textua1 = state.combine(blurred: bgTexture, weight: 1.0, noise: noise1, weight: 0.35, color: Color.white, onto: combTex)
-            var textua2 = state.combine(blurred: textua1, weight: 1.0, noise: noise2, weight: 0.24, color: Color.white, onto: combTex2)
-            state.clamp(texture: &textua2, wall: 0.82, tolerance: 0.00, onto: combTex)
+            //Add noise one
+            let textua1 = state.combine(blurred: splatterTexture, weight: 1.0, noise: noise1, weight: Float(SplatConstants.noise1Contrib), color: Color.white, onto: combTex)
+            
+            //Add noise two
+            var textua2 = state.combine(blurred: textua1, weight: 1.0, noise: noise2, weight: Float(SplatConstants.noise2Contrib), color: Color.white, onto: combTex2)
+            
+            //Clamp the result//0.82 0 dsf ssdfsf
+            state.clamp(texture: &textua2, wall: SplatConstants.clampCenter, tolerance: SplatConstants.clampTolerance, onto: combTex)
+            
+            //Paint onto the canvas (calls water state internal function)
             paint(texture: textua2)
         } else {
+            //We are in the wrong state so queue it up
             queue.append(.location(pos))
         }
     }
+    
+    //Paints a paint splatter texture 'texture' onto the canvas
     public func paint(texture: MTLTexture) {
-        //If it can does immediately if not queues it up
+        
+        //State check!
         if (state.getState() == .Preparing) {
+            
+            //Get a random color for the splatter
             let splatColor = randomColor()
             
+            //Get the input and output texture
             let input = getInput()
             let output = getOutput()
             
+            //Set the drawable
             state.setDrawable(to: output)
+            
+            //Set the encoder
             let render = state.getRenderEncoder()
+            
+            //Set to state
             render.setRenderPipelineState(paint)
+            
+            //Pass in the previous canvas and the splatter texture
             render.setFragmentTexture(input, index: 0)
             render.setFragmentTexture(texture, index: 1)
+            
+            //Pass in the color to the shader
             let intermediate = CIColor.convert(color: splatColor)
             var color:float3 = float3(Float(intermediate.red), Float(intermediate.green), Float(intermediate.blue))
             render.setFragmentBytes(&color, length: MemoryLayout<float3>.stride, index: 0)
+            
+            //Draw full screen
             render.drawFullScreen()
+            
+            //Finish encoding
             state.finishEncoding(encoder: render)
             
+            //Increase the frame
             frame += 1
         } else {
+            //We are in the wrong state so queue it up
             queue.append(.paint(texture))
         }
     }
+    
+    //Steps the water simulation by one frame
     public func simulate() -> MTLTexture? {
+        
+        //Queue up another simulation incase this goes bad
         simQueue += 1
+        
+        //State check
         if (state.getState() != .Preparing) {
-            
             return nil
         } else {
+            
+            //Go through the instruciton queue and do everything
             for instruction in queue {
                 switch instruction {
                 case .reset:
@@ -121,27 +224,46 @@ public class WatercolorSimulation {
                 }
                 
             }
+            
+            //We have emptied the queue
             queue = []
+            
+            //If we have simulations queued up (should be at least one) then do them
             var output:MTLTexture? = nil
             for _ in 0..<simQueue {
-                
-                
+                //Get the input and output textures
                 let input = getInput()
                 output = getOutput()
                 
+                //Set the drawable to a texture to the output
                 state.setDrawable(to: output!)
+                
+                //Get the render encoder
                 let render = state.getRenderEncoder()
+                
+                //Set the pipeline
                 render.setRenderPipelineState(step)
+                
+                //Pass in the canvas
                 render.setFragmentTexture(input, index: 0)
+                
+                //Draw full screen
                 render.drawFullScreen()
+                
+                //Finish encoding
                 state.finishEncoding(encoder: render)
                 
+                //Increase the frame
                 frame += 1
             }
+            
+            //Reset the queue conter and return the result
             simQueue = 0
             return output
         }
     }
+    
+    //Get the input texture (switches the textures from role as input textures and output textures)
     private func getInput() -> MTLTexture {
         if (frame % 2 == 0) {
             return tex1
@@ -150,6 +272,7 @@ public class WatercolorSimulation {
         }
     }
     
+    //Get the output texture (switches the textures from role as input textures and output textures)
     private func getOutput() -> MTLTexture {
         if (frame % 2 == 1) {
             return tex1
