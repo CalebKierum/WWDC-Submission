@@ -53,17 +53,17 @@ public class SplatConstants {
 }
 
 //CAREFUL: Many of these are intertwined and
-public class WaterSimulationConstants {
+public class WaterSimConstants {
     //How far a spot looks for other stpots
     public static var lookDistance:CGFloat = 3.0
     //Strength of water barrier before diffusion
-    public static var diffusionStrength:CGFloat = 0.2
+    public static var overflowStrength:CGFloat = 0.2
     //Strenght of the current color vs others
-    public static var colorStrength:CGFloat = 0.05
+    public static var diffusionBoost:CGFloat = 0.05
     //SPeed that the canvas dries
     public static var drySpeed:CGFloat = 0.03
     //The ammount that color spreads to adjacent things
     public static var colorSpread:CGFloat = 0.9
-    //Viscosity of the water of intertwined with everything else
-    public static var viscosity:CGFloat = 0.05
+    //The ammount of wetness given to each new splat
+    public static var splatWetness:CGFloat = 10.0
 }

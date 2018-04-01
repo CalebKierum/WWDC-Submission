@@ -47,6 +47,13 @@ fragment float4 clear(ColorInOut texCoord [[stage_in]]) {
 
 //Steps the simulation by one frame
 fragment float4 step(texture2d<float> current [[texture(0)]],
+                    constant float &lookDistance [[ buffer(0) ]],
+                    constant float &overflowStrength [[ buffer(1) ]],
+                    constant float &diffusionBoost [[ buffer(2) ]],
+                    constant float &drySpeed [[ buffer(3) ]],
+                    constant float &colorSpread [[ buffer(4) ]],
+                    constant float &viscosity [[ buffer(5) ]],
+                    constant float &wall [[ buffer(6) ]],
                      ColorInOut texCoord [[stage_in]]) {
     constexpr sampler colorSampler(mip_filter::linear,
                                    mag_filter::linear,
@@ -59,7 +66,7 @@ fragment float4 step(texture2d<float> current [[texture(0)]],
     float4 curr = current.sample(colorSampler, texCoord.texCoord);
     
     //How far we look for adjacent things in the water
-    float2 scalar = float2(3.0 * (1.0 / 800.0));
+    float2 scalar = float2(lookDistance * (1.0 / 800.0));
     
     //The texture coordinate of the water
     float2 tc = texCoord.texCoord;
@@ -79,7 +86,7 @@ fragment float4 step(texture2d<float> current [[texture(0)]],
     d.a *= (cap / 1.0);
     
     //Clamp the wentess that travels to adjacent cells
-    float wetnessClamp = 0.2;
+    float wetnessClamp = overflowStrength;
     float il = clamp(l.a - col.a,0.0,wetnessClamp);
     float ir = clamp(r.a - col.a,0.0,wetnessClamp);
     float iu = clamp(u.a - col.a,0.0,wetnessClamp);
@@ -93,12 +100,12 @@ fragment float4 step(texture2d<float> current [[texture(0)]],
     float4 avg = (l + d + r + u) * 0.25;
     
     //Decide how much of our color mixes with the outside colors
-    float porous = min(1.0, min(0.5,(col.a+avg.a)*0.9)*3.0);
-    col.xyz = mix(col.xyz,avg.xyz,porous*0.05);
+    float porous = min(1.0, min(0.5,(col.a+avg.a)*colorSpread)*3.0);
+    col.xyz = mix(col.xyz,avg.xyz,porous*diffusionBoost);
     col.w = mix(col.w,avg.w,porous) * (1.0 / cap);
     
     //The paint dries gradually
-    col.w /= (1.0 + (0.03));
+    col.w /= (1.0 + (drySpeed));
     return col;
 }
 
@@ -106,6 +113,7 @@ fragment float4 step(texture2d<float> current [[texture(0)]],
 fragment float4 paint(texture2d<float> current [[texture(0)]],
                       texture2d<float> splat [[texture(1)]],
                       constant float3 &color [[ buffer(0) ]],
+                      constant float &splatWetness [[ buffer(1) ]],
                       ColorInOut texCoord [[stage_in]]) {
     constexpr sampler colorSampler(mip_filter::linear,
                                    mag_filter::linear,
@@ -120,5 +128,5 @@ fragment float4 paint(texture2d<float> current [[texture(0)]],
     
     float adj = strength;
     float3 mi = sqrt(mix(curr.xyz * curr.xyz, paint * paint, 1.0 - smoothstep(0.8, 1.0, curr.a) * 0.2));
-    return float4(float3(mi * adj + (1.0 - adj) * curr.xyz), adj * 10.0 * (1.0 / cap) + curr.a);
+    return float4(float3(mi * adj + (1.0 - adj) * curr.xyz), adj * splatWetness * (1.0 / cap) + curr.a);
 }

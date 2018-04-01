@@ -186,6 +186,9 @@ public class WatercolorSimulation {
             let intermediate = CIColor.convert(color: splatColor)
             var color:float3 = float3(Float(intermediate.red), Float(intermediate.green), Float(intermediate.blue))
             render.setFragmentBytes(&color, length: MemoryLayout<float3>.stride, index: 0)
+            var wet:Float = Float(WaterSimConstants.splatWetness)
+            render.setFragmentBytes(&wet, length: MemoryLayout<Float>.stride, index: 1)
+            
             
             //Draw full screen
             render.drawFullScreen()
@@ -240,6 +243,17 @@ public class WatercolorSimulation {
                 
                 //Get the render encoder
                 let render = state.getRenderEncoder()
+                
+                var in_ld:Float = Float(WaterSimConstants.lookDistance)
+                render.setFragmentBytes(&in_ld, length: MemoryLayout<Float>.stride, index: 0)
+                var in_os:Float = Float(WaterSimConstants.overflowStrength)
+                render.setFragmentBytes(&in_os, length: MemoryLayout<Float>.stride, index: 1)
+                var in_db:Float = Float(WaterSimConstants.diffusionBoost)
+                render.setFragmentBytes(&in_db, length: MemoryLayout<Float>.stride, index: 2)
+                var in_ds:Float = Float(WaterSimConstants.drySpeed)
+                render.setFragmentBytes(&in_ds, length: MemoryLayout<Float>.stride, index: 3)
+                var in_cs:Float = Float(WaterSimConstants.colorSpread)
+                render.setFragmentBytes(&in_cs, length: MemoryLayout<Float>.stride, index: 4)
                 
                 //Set the pipeline
                 render.setRenderPipelineState(step)
