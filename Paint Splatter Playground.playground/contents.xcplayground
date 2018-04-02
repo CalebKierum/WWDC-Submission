@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<playground version='6.0' target-platform='ios' display-mode='raw'>
+    <pages>
+        <page name='Welcome'/>
+        <page name='Setup'/>
+        <page name='Shapes'/>
+        <page name='Animations'/>
+        <page name='Circle'/>
+        <page name='Geometry Functions'/>
+        <page name='Paint Splatter'/>
+        <page name='Blur'/>
+        <page name='Noise'/>
+        <page name='Tweak'/>
+    </pages>
+</playground>
